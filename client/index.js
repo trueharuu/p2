@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 // eslint-disable-next-line no-undef
 const d = document;
 
@@ -5,7 +6,7 @@ const i = d.getElementById('console');
 const o = d.getElementById('output');
 const ws = new WebSocket('ws://localhost:8000');
 
-let id = Date.now();
+let id = ~~(Date.now() % 1e7);
 
 let user = undefined;
 {
@@ -13,12 +14,31 @@ let user = undefined;
   p.classList.add('error');
 
   p.innerText =
-    '! You will not be able to send messages without a username. Set one with `/name <name>`';
+    '! You will not be able to send messages without logging in. Set one with `/login <name>`';
 
   o.appendChild(p);
 }
+
 i.addEventListener('keypress', function (event) {
+  /** @type string */
+  const value = this.value;
   if (event.key === 'Enter') {
+    // client commands
+    if (value.startsWith('/c:')) {
+      const ids = value.slice(3).split(' ');
+
+      const name = ids[0];
+
+      if (name === 'max_messages') {
+        const count = Number.parseInt(ids[1]);
+
+        if (Number.isNaN(count)) {
+          
+        }
+        // ws.emit doesn't exist :(
+        onMessage(JSON.stringify({ event: 'clientMessage', data: '/c:max_messages :: '}));
+      }
+    }
     const d = {
       event: 'message',
       data: {
@@ -27,14 +47,15 @@ i.addEventListener('keypress', function (event) {
       },
       from: id,
     };
-    console.log(d);
+
     ws.send(JSON.stringify(d));
 
     this.value = '';
   }
 });
 
-ws.addEventListener('message', (event) => {
+ws.addEventListener('message', onMessage);
+function onMessage(event) {
   const json = JSON.parse(event.data);
   console.log(json);
 
@@ -107,4 +128,8 @@ ws.addEventListener('message', (event) => {
 
     o.appendChild(p);
   }
-});
+
+  if (o.childElementCount > 30 && o.firstChild !== null) {
+    o.removeChild(o.firstChild);
+  }
+}

@@ -21,14 +21,14 @@ ws.on('connection', (socket) => {
 
         const name = ids[0];
 
-        if (name === 'name') {
-          if (ids.length === 1) {
+        if (name === 'name' || name === 'login') {
+          if (ids.length === 1 && name !== 'login') {
             // send it back individually! this is a client message
 
             socket.send(
               JSON.stringify({
                 event: WsEvent.ClientMessage,
-                data: `/name :: ${
+                data: `/${name} :: ${
                   json.data.user
                     ? `Your current name is "${json.data.user}"`
                     : 'You do not have a name set.'
@@ -43,7 +43,7 @@ ws.on('connection', (socket) => {
             socket.send(
               JSON.stringify({
                 event: WsEvent.ClientMessage,
-                data: `/name :: Set your name to "${n}"`,
+                data: `/${name} :: Set your name to "${n}"`,
                 from: json.from,
               })
             );
@@ -59,6 +59,15 @@ ws.on('connection', (socket) => {
             );
             return;
           }
+        }
+
+        if (name === 'id') {
+          return socket.send(
+            JSON.stringify({
+              event: WsEvent.ClientMessage,
+              data: `/id :: ${json.from}`,
+            })
+          );
         }
 
         return;
