@@ -2,25 +2,28 @@ export enum WsEvent {
   Message = 'message',
   Ping = 'ping',
   Connection = 'connection',
-  UsernameUpdated = 'usernameUpdated',
+  UsernameUpdate = 'usernameUpdate',
+  ClientMessage = 'clientMessage',
 }
 
 export interface BaseEvent<E extends WsEvent, T> {
   event: E;
   data: T;
+  from: number;
 }
 
 export type MessageEvent = BaseEvent<WsEvent.Message, Message>;
 export type PingEvent = BaseEvent<WsEvent.Ping, never>;
 export type ConnectionEvent = BaseEvent<WsEvent.Connection, never>;
 export type UsernameUpdatedEvent = BaseEvent<
-  WsEvent.UsernameUpdated,
+  WsEvent.UsernameUpdate,
   UsernameUpdated
 >;
+export type ClientMessage = BaseEvent<WsEvent.ClientMessage, string>;
 
 export interface Message {
   content: string;
-  user: string;
+  user?: string;
 }
 
 export interface UsernameUpdated {
@@ -28,4 +31,9 @@ export interface UsernameUpdated {
   new: string;
 }
 
-export type Event = MessageEvent | PingEvent;
+export type Event =
+  | ClientMessage
+  | ConnectionEvent
+  | MessageEvent
+  | PingEvent
+  | UsernameUpdatedEvent;

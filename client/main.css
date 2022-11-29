@@ -33,3 +33,11 @@
 .username-update-message {
   color: #777ed3;
 }
+
+.client-message {
+  color: grey;
+}
+
+.error {
+  color: #ed4245
+}
