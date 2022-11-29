@@ -94,7 +94,7 @@ ws.addEventListener('message', (event) => {
     p.classList.add('username-update-message');
 
     const bold = d.createElement('b');
-    bold.innerText = '-> ' + json.data.old;
+    bold.innerText = ':: ' + json.data.old;
     p.appendChild(bold);
 
     const span = d.createElement('span');
