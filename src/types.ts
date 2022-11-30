@@ -1,7 +1,10 @@
+import type { WebSocket } from 'ws';
+
 export enum WsEvent {
   Message = 'message',
   Ping = 'ping',
   Connection = 'connection',
+  Disconnect = 'disconnect',
   UsernameUpdate = 'usernameUpdate',
   ClientMessage = 'clientMessage',
 }
@@ -20,6 +23,7 @@ export type UsernameUpdatedEvent = BaseEvent<
   UsernameUpdated
 >;
 export type ClientMessage = BaseEvent<WsEvent.ClientMessage, string>;
+export type DisconnectEvent = BaseEvent<WsEvent.Disconnect, string>;
 
 export interface Message {
   content: string;
@@ -31,9 +35,15 @@ export interface UsernameUpdated {
   new: string;
 }
 
+export interface Disconnect {
+  id: number;
+  username: string;
+}
+
 export type Event =
-  | ClientMessage
-  | ConnectionEvent
-  | MessageEvent
-  | PingEvent
-  | UsernameUpdatedEvent;
+  ClientMessage | ConnectionEvent | DisconnectEvent | MessageEvent | PingEvent | UsernameUpdatedEvent;
+
+export interface Sock extends WebSocket {
+  id: number;
+  username: string;
+}

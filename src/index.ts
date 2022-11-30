@@ -1,7 +1,7 @@
 import { static as s } from 'express';
 import { app, ws } from './globals';
 import { send } from './tools';
-import type { Event } from './types';
+import type { Event, Sock } from './types';
 import { WsEvent } from './types';
 
 app.use(s('client'));
@@ -36,17 +36,17 @@ ws.on('connection', (socket) => {
                 from: json.from,
               })
             );
-
-            return;
           } else {
             const n = ids.slice(1).join(' ');
-            socket.send(
-              JSON.stringify({
-                event: WsEvent.ClientMessage,
-                data: `/${name} :: Set your name to "${n}"`,
-                from: json.from,
-              })
-            );
+            if (name !== 'login') {
+              socket.send(
+                JSON.stringify({
+                  event: WsEvent.ClientMessage,
+                  data: `/${name} :: Set your name to "${n}"`,
+                  from: json.from,
+                })
+              );
+            }
 
             // this is really weird, we send the name changed event before the client who asks for it even knows
             send(
@@ -57,8 +57,10 @@ ws.on('connection', (socket) => {
                 from: json.from,
               })
             );
-            return;
           }
+
+          (socket as Sock).id = json.from;
+          (socket as Sock).username = json.data.user || '';
         }
 
         if (name === 'id') {
@@ -77,6 +79,15 @@ ws.on('connection', (socket) => {
     // just send it back to client(s)
     send(ws, json);
   });
+
+  socket.on('close', () => {
+    send(ws, {
+      event: WsEvent.Disconnect,
+      data: { id: (socket as Sock).id, username: (socket as Sock).username },
+      from: -1,
+    });
+  });
 });
 
 process.on('uncaughtException', console.error);
+
